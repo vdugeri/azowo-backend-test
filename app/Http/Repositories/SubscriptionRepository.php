@@ -26,7 +26,7 @@ class SubscriptionRepository implements SubscriptionContract
      */
     public function __construct(Subscription $subscription)
     {
-
+        $this->subscription = $subscription;
     }
 
     /**
@@ -35,16 +35,27 @@ class SubscriptionRepository implements SubscriptionContract
      */
     public function createSubscription(array $data): Subscription
     {
-        // TODO: Implement createSubscription() method.
+        return $this->subscription->create($data);
     }
 
     /**
      * {@inheritdoc}
      *
      */
-    public function updateSubscription(int $id, array $data): Subscription
+    public function updateSubscription(int $id, array $data)
     {
-        // TODO: Implement updateSubscription() method.
+        $subscription = $this->subscription->find($id);
+
+        if ($subscription) {
+            $subscription->email = $data['email'];
+            $subscription->confirmed = $data['confirmed'];
+
+            $subscription->save();
+
+            return $subscription;
+        }
+
+        return null;
     }
 
     /**
@@ -53,7 +64,7 @@ class SubscriptionRepository implements SubscriptionContract
      */
     public function findSubscriber(string $email)
     {
-        // TODO: Implement findSubscriber() method.
+        return $this->subscription->where('email', $email)->get();
     }
 
     /**
@@ -62,6 +73,6 @@ class SubscriptionRepository implements SubscriptionContract
      */
     public function deleteSubscription(int $id)
     {
-        // TODO: Implement deleteSubscription() method.
+        $this->subscription->destroy($id);
     }
 }

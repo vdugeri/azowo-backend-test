@@ -34,9 +34,9 @@ interface SubscriptionContract
      * @param int $id
      * @param array $data
      *
-     * @return Subscription
+     * @return mixed
      */
-    public function updateSubscription(int $id, array $data): Subscription;
+    public function updateSubscription(int $id, array $data);
 
     /**
      * Finds  a subscriber with a matching email address
