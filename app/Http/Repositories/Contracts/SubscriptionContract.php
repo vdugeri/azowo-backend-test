@@ -9,6 +9,7 @@ namespace App\Http\Repositories\Contracts;
 
 
 use App\Subscription;
+use Illuminate\Support\Collection;
 
 /**
  * @author Verem Dugeri <verem.dugeri@gmail.com>
@@ -20,6 +21,13 @@ use App\Subscription;
 interface SubscriptionContract
 {
     /**
+     * Fetch and return all confirmed subscriptions;
+     *
+     * @return Collection
+     */
+    public function all(): Collection;
+
+    /**
      * Creates a new subscriber record in the database
      *
      * @param array $data
@@ -28,24 +36,15 @@ interface SubscriptionContract
      */
     public function createSubscription(array $data): Subscription;
 
-    /**
-     * Updates a subscription matching the specified id
-     *
-     * @param int $id
-     * @param array $data
-     *
-     * @return mixed
-     */
-    public function updateSubscription(int $id, array $data);
 
     /**
-     * Finds  a subscriber with a matching email address
+     * Confirm a subscription matching the specified email
      *
      * @param string $email
      *
      * @return mixed
      */
-    public function findSubscriber(string $email);
+    public function confirm(string $email);
 
     /**
      * Delete  a subscription record matching the specified id from the database.

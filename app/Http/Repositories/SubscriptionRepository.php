@@ -5,6 +5,7 @@ namespace App\Http\Repositories;
 
 use App\Http\Repositories\Contracts\SubscriptionContract;
 use App\Subscription;
+use Illuminate\Support\Collection;
 
 /**
  * @author Verem Dugeri <verem.dugeri@gmail.com>
@@ -31,6 +32,14 @@ class SubscriptionRepository implements SubscriptionContract
 
     /**
      * {@inheritdoc}
+     */
+    public function all(): Collection
+    {
+        return $this->subscription->confirmed()->get();
+    }
+
+    /**
+     * {@inheritdoc}
      *
      */
     public function createSubscription(array $data): Subscription
@@ -40,31 +49,19 @@ class SubscriptionRepository implements SubscriptionContract
 
     /**
      * {@inheritdoc}
-     *
      */
-    public function updateSubscription(int $id, array $data)
+    public function confirm(string $email)
     {
-        $subscription = $this->subscription->find($id);
+        $subscriber = $this->subscription->where('email', $email)->first();
 
-        if ($subscription) {
-            $subscription->email = $data['email'];
-            $subscription->confirmed = $data['confirmed'];
+        if ($subscriber) {
+            $subscriber->confirmed = true;
+            $subscriber->save();
 
-            $subscription->save();
-
-            return $subscription;
+            return $subscriber;
         }
 
         return null;
-    }
-
-    /**
-     * {@inheritdoc}
-     *
-     */
-    public function findSubscriber(string $email)
-    {
-        return $this->subscription->where('email', $email)->get();
     }
 
     /**
