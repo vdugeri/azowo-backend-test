@@ -2,6 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\ConfirmSubscription;
+use App\Utils\TokenUtils;
+use Illuminate\Support\Facades\Mail;
 use Validator;
 use App\Http\Repositories\Contracts\SubscriptionContract;
 use Illuminate\Http\Request;
@@ -45,52 +48,40 @@ class SubscriptionController extends Controller
 
         $subscription = $this->subscriptions->createSubscription($request->all());
 
+        $url = TokenUtils::makeUrl($request->get('email'));
+
+        Mail::to($request->get('email'))->send(new ConfirmSubscription($url));
+
         return response()->json($subscription, 201);
     }
 
 
-    public function show($email)
-    {
-        $subscriber  = $this->subscriptions->findSubscriber($email);
-
-        if ($subscriber) {
-            return response()->json($subscriber, 200);
-        }
-
-        return response()->json(['error' => 'subscriber not found'], 404);
-    }
-
     /**
-     * Update the specified resource in storage.
+     * Confirm subscription
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  int  $id
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     *
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function update(Request $request, $id)
-    {
-        $validator = $this->validateUpdateRequest($request->all());
-
-        if ($validator->fails()) {
-            return response()->json($validator->errors(), 400);
-        }
-
-        $subscription = $this->subscriptions->updateSubscription($id, $request->all());
-
-        return response()->json($subscription);
-    }
-
     public function confirm(Request $request)
     {
+        $token = $request->get('token');
         $email = $request->get('email');
 
-        $subscription = $this->subscriptions->confirm($email);
+        $email = TokenUtils::validateToken($token, $email);
 
-        if ($subscription) {
-            return response()->json($subscription);
+        if ($email) {
+            $subscription = $this->subscriptions->confirm($email);
+
+            if ($subscription) {
+                return response()->json($subscription);
+            }
+
+            return response()->json(['error' => 'subscriber not found'], 404);
+        } else {
+            return response()->json(['error' => 'Error confirming subscription'], 400);
         }
 
-        return response()->json(['error' => 'subscriber not found'], 404);
     }
 
     /**
